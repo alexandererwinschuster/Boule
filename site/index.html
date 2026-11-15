@@ -671,7 +671,9 @@ document.addEventListener('input',e=>{
   const g=d.rounds[+t.dataset.r].groups[+t.dataset.g];
   let v=String(t.value).trim()===''?null:Math.floor(+t.value);
   if(v!==null&&!(v>=0))v=null;if(v>99)v=99;
-  g[t.dataset.s=='a'?'sa':'sb']=v;updRes();
+  g[t.dataset.s=='a'?'sa':'sb']=v;
+  if(v===null){if(String(t.value).trim()!=='')t.value=''}else if(String(v)!==String(t.value))t.value=String(v);
+  updRes();
 });
 document.addEventListener('keydown',e=>{
   if(e.key!='Enter')return;
