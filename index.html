@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boule</title>
+<style>
+:root{--bg:#e4e6df;--card:#f4f5f0;--ink:#1c2824;--mute:#5b6a64;--line:#c5cac0;--acc:#e3b21f;--onacc:#1c2824;--win:#2f6b4f;--onwin:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15201c;--card:#1e2c27;--ink:#e9ede6;--mute:#9baba3;--line:#34463f;--win:#4a9a74;--onwin:#10201a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15201c;--card:#1e2c27;--ink:#e9ede6;--mute:#9baba3;--line:#34463f;--win:#4a9a74;--onwin:#10201a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:12px 14px 60px}
+h1{font-size:1.5rem;margin:6px 0 8px;letter-spacing:-.01em}
+h2{font-size:1.1rem;margin:12px 0 8px}
+.card h2{margin-top:0}
+a{color:var(--ink)}
+.sub{color:var(--mute);margin:0 0 12px;font-size:.92rem}
+.who{margin:0 0 6px}
+.top{display:flex;align-items:center;gap:8px;margin:6px 0 4px}
+.brand{font-weight:800;font-size:1.3rem;text-decoration:none;margin-right:auto;border-bottom:4px solid var(--acc)}
+.crumb{color:var(--mute);font-size:.9rem;margin:8px 0 10px}
+.crumb a{color:var(--mute)}
+nav.tabs{display:flex;gap:6px;margin:10px 0 14px;border-bottom:2px solid var(--line)}
+nav.tabs button{flex:1;padding:10px 4px;background:none;border:0;border-bottom:4px solid transparent;margin-bottom:-2px;color:var(--mute);font:inherit;font-weight:600;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+.row2{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0;font-weight:600;text-decoration:none;padding:6px 0}
+.row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.row .p{font-variant-numeric:tabular-nums;font-weight:700;min-width:2.5rem;text-align:right}
+.row .h{color:var(--mute);font-size:.82rem;white-space:nowrap}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--win)}
+input:not([type=checkbox]){flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+select{padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+button.b{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+button.pri{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper b{min-width:2.4ch;text-align:center;font-size:1.1rem;font-variant-numeric:tabular-nums}
+.stepper .b{width:44px;height:44px;padding:0;font-size:1.25rem;line-height:1}
+#sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.4em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{padding:9px 14px;border:0;background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--onacc);font-weight:700}
+.rh{margin:10px 0 2px;font-weight:700;font-size:.9rem;color:var(--mute)}
+.byeb{padding:10px 8px;border-radius:8px;border:2px dashed var(--line);text-align:center;line-height:1.3}
+.match{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch;padding:8px 0;border-top:1px solid var(--line)}
+.team{padding:10px 8px;border-radius:8px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;text-align:center;cursor:pointer;line-height:1.3}
+.team[aria-pressed="true"]{background:var(--win);border-color:var(--win);color:var(--onwin);font-weight:700}
+.team:disabled{cursor:default;opacity:1}
+.vs{align-self:center;color:var(--mute);font-size:.85rem}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--acc);color:var(--onacc);font-size:.8rem;font-weight:700;margin-left:6px}
+.warn{border-left:4px solid var(--acc);padding:6px 10px;margin:8px 0;color:var(--mute);font-size:.92rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+td,th{padding:6px 8px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+td:first-child,th:first-child{text-align:left}
+th{font-weight:600;color:var(--mute);font-size:.85rem}
+ul{padding-left:1.1rem;margin:6px 0}
+li{margin:4px 0}
+[hidden]{display:none!important}
+summary{cursor:pointer;padding:2px 0}
+.smatch{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.smatch .r{text-align:right}
+.scs{display:flex;align-items:center;gap:4px}
+input[type=number].sc{flex:none;width:3.6rem;text-align:center;padding:10px 4px}
+.scv{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const SB='https://ixopqbbnpoqkxqrzykoi.supabase.co',AK='sb_publishable_YCD9dSvUS37YvcyrvduwlQ_0vEWWrNn',SKEY='boule.sess';
+const PT={0:-8,1:-2,2:2,3:8},ST=['','erstellt','geprüft','eingespielt'],TYP={kreisel:'Kreisel',supermelee:'Supermêlée'};
+let sess=null,roles={super:false,vereine:[]},R={v:'home'},V=null,P=null,S=null,list=[],projs=[],admins=[];
+let dayN=null,tab='p',net='',err='',pend='',timer=null,last='',rev=null,arm={k:null},back='#/',lastEmail='',pwFlow='';
+try{sess=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){}
+
+/* ---------- Helfer ---------- */
+const $=id=>document.getElementById(id);
+const val=id=>((($(id)||{}).value)||'').trim();
+const raw=id=>(($(id)||{}).value)||'';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug=s=>s.toLowerCase().replace(/ß/g,'ss').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'x';
+const canVerein=id=>!!sess&&(roles.super||roles.vereine.includes(id));
+const canEdit=()=>!!P&&canVerein(P.verein_id);
+const lbl=(k,t)=>arm.k===k?'Sicher?':t;
+const msgOf=x=>(x.status==409||x.code=='23505')?'Dieser Name ist schon vergeben.':(x.message||'Unbekannter Fehler');
+function flash(t){const e=$('msg');if(e){e.textContent=t||'';e.hidden=!t}}
+function go(h){if(location.hash===h||(h=='#/'&&!location.hash))route();else location.hash=h}
+function confirm2(k,text){
+  if(arm.k===k){arm={k:null};return true}
+  arm={k};render();flash(text);
+  setTimeout(()=>{if(arm.k===k){arm={k:null};render()}},5000);
+  return false;
+}
+
+/* ---------- Supabase (reines fetch) ---------- */
+async function api(path,opt,tok){
+  const h=Object.assign({apikey:AK,'Content-Type':'application/json'},(opt&&opt.headers)||{});
+  if(tok)h.Authorization='Bearer '+tok;
+  const r=await fetch(SB+path,Object.assign({},opt,{headers:h}));
+  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok){const x=new Error((j&&(j.msg||j.error_description||j.message))||('HTTP '+r.status));x.status=r.status;x.code=j&&j.code;throw x}
+  return j;
+}
+async function rest(path,opt){return api('/rest/v1/'+path,opt,await token())}
+function setSess(j,email){
+  const u=j.user||{};
+  sess={at:j.access_token,rt:j.refresh_token,exp:Date.now()+((j.expires_in||3600)-30)*1000,email:u.email||email||(sess&&sess.email)||'',uid:u.id||(sess&&sess.uid)||''};
+  try{localStorage.setItem(SKEY,JSON.stringify(sess))}catch(e){}
+}
+function clearSess(){sess=null;roles={super:false,vereine:[]};try{localStorage.removeItem(SKEY)}catch(e){}}
+async function token(){
+  if(!sess)return null;
+  if(Date.now()>sess.exp){
+    try{setSess(await api('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:sess.rt})}))}
+    catch(e){clearSess();return null}
+  }
+  return sess.at;
+}
+async function loadRoles(){
+  roles={super:false,vereine:[]};
+  const t=await token();if(!t||!sess.uid)return;
+  try{
+    const [s,a]=await Promise.all([
+      api('/rest/v1/superadmins?select=user_id&user_id=eq.'+sess.uid,{},t),
+      api('/rest/v1/verein_admins?select=verein_id&user_id=eq.'+sess.uid,{},t)]);
+    roles.super=!!(s&&s.length);roles.vereine=(a||[]).map(x=>x.verein_id);
+  }catch(e){}
+}
+
+/* ---------- Routing ---------- */
+function parse(){
+  let p=[];try{p=location.hash.replace(/^#\/?/,'').split('/').filter(Boolean).map(decodeURIComponent)}catch(e){}
+  if(p[0]=='login')return{v:'login'};
+  if(p[0]=='konto')return{v:'konto'};
+  if(p[0]=='v'&&p[1]){if(p[2]=='p'&&p[3])return{v:'proj',vs:p[1],ps:p[3]};return{v:'verein',vs:p[1]}}
+  return{v:'home'};
+}
+function normalize(p){
+  const d=(p.daten&&typeof p.daten=='object')?p.daten:{};
+  if(p.typ=='kreisel'){d.players=d.players||[];d.mode=d.mode||2;d.days=d.days||[];d.lanes=d.lanes||0}
+  if(p.typ=='supermelee'){d.players=d.players||[];d.days=d.days||[];d.lanes=d.lanes||0;d.rounds=d.rounds||3}
+  p.daten=d;return d;
+}
+async function route(){
+  R=parse();V=null;P=null;S=null;err='';arm={k:null};tab='p';dayN=null;clearTimeout(timer);net='ok';
+  if(R.v=='login'&&sess){history.replaceState(null,'',location.pathname+location.search+'#/');R=parse()}
+  $('app').innerHTML=head()+'<p class="sub">Lädt …</p>';
+  try{
+    if(R.v=='home')list=await rest('vereine?select=id,name,slug&order=name');
+    else if(R.v=='verein'||R.v=='proj'){
+      const vs=await rest('vereine?select=id,name,slug&slug=eq.'+encodeURIComponent(R.vs));
+      V=vs&&vs[0];if(!V)throw new Error('Verein nicht gefunden.');
+      if(R.v=='verein'){
+        projs=await rest('projekte?select=id,name,slug,typ&verein_id=eq.'+V.id+'&order=name');
+        admins=roles.super?await rest('verein_admins?select=user_id,email&verein_id=eq.'+V.id+'&order=email'):[];
+      }else{
+        const ps=await rest('projekte?select=*&verein_id=eq.'+V.id+'&slug=eq.'+encodeURIComponent(R.ps));
+        P=ps&&ps[0];if(!P)throw new Error('Projekt nicht gefunden.');
+        S=normalize(P);rev=P.updated_at;last=JSON.stringify(S);
+      }
+    }
+  }catch(e){err=e.message;V=V||null}
+  render();
+  if(pend){flash(pend);pend=''}
+}
+
+/* ---------- Speichern / Aktualisieren ---------- */
+function queue(){clearTimeout(timer);timer=setTimeout(push,600)}
+async function push(){
+  if(!canEdit()||!S)return;
+  const str=JSON.stringify(S);if(str===last)return;
+  net='save';sub();
+  try{
+    const j=await rest('projekte?id=eq.'+P.id,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({daten:S,updated_at:new Date().toISOString()})});
+    if(!j||!j.length)throw new Error('Speichern nicht erlaubt');
+    last=str;rev=j[0].updated_at;net='ok';
+    if(JSON.stringify(S)!==last)queue();
+  }catch(e){net='err:'+e.message}
+  sub();
+}
+async function pull(){
+  try{
+    const j=await rest('projekte?select=daten,updated_at&id=eq.'+P.id);
+    const row=j&&j[0];
+    if(row&&row.updated_at!==rev){P.daten=row.daten;S=normalize(P);rev=row.updated_at;last=JSON.stringify(S);render()}
+    net='ok';
+  }catch(e){net='err:'+e.message}
+  sub();
+}
+setInterval(()=>{if(R.v=='proj'&&P&&!canEdit()&&!document.hidden)pull()},20000);
+
+/* ---------- Turnierlogik (Kreisel) ---------- */
+const nm=id=>{const p=S.players.find(p=>p.id===id);return p?p.name:'?'};
+const team=ids=>ids.map(i=>esc(nm(i))).join(' + ');
+const cur=()=>S.days.length?S.days[S.days.length-1]:null;
+const sel=()=>(dayN&&S.days.find(d=>d.n===dayN))||cur();
+const modeName=m=>m==1?'Tête':'Dublette';
+function baseSizes(n,mode){
+  const c={4:0,5:0,6:0,3:0};
+  if(mode==2&&n==7){c[4]=1;c[3]=1}
+  else{let r=n;while(r>0){const m=r%4;
+    if(m==0){c[4]++;r-=4}else if(m==1){c[5]++;r-=5}else if(m==2){c[6]++;r-=6}
+    else if(mode==2){c[5]++;r-=5}else{c[3]++;r-=3}}}
+  return [4,5,6,3].flatMap(k=>Array(c[k]).fill(k));
+}
+/* Bahnen: pro Runde belegt jede Begegnung eine Bahn.
+   Dublette: eine Gruppe = eine Bahn. Tête: eine Bahn je zwei Spieler (Dreier: eine Bahn). */
+const laneUse=(k,mode)=>(mode==1&&k!=3)?Math.floor(k/2):1;
+const needLanes=(sz,mode)=>sz.reduce((a,k)=>a+laneUse(k,mode),0);
+function minLanes(n,mode){
+  if(n<4)return 0;
+  if(mode==1)return needLanes(baseSizes(n,1),1);
+  return n==7?2:Math.ceil(n/6);
+}
+/* Gruppengrößen für n Spieler bei L Bahnen, oder null wenn die Bahnen nicht reichen.
+   Dublette: reichen die Bahnen für die Standardaufteilung nicht, werden Vierer zu Sechsern (Triplette) zusammengelegt. */
+function sizes(n,mode,L){
+  const b=baseSizes(n,mode);
+  if(L==null)return b;
+  if(mode==1||n<4)return needLanes(b,mode)<=L?b:null;
+  if(b.length<=L)return b;
+  if(n==7||L<Math.ceil(n/6))return null;
+  const extra=n-4*L,s=Math.floor(extra/2),f=extra-2*s,v=L-s-f;
+  return Array(v).fill(4).concat(Array(f).fill(5),Array(s).fill(6));
+}
+const sizeName={3:'Dreier',4:'Vierer',5:'Fünfer',6:'Sechser'};
+function modeInfo(n,L,sz,busy,d){
+  if(busy)return 'Spieltag '+d.n+' ist noch nicht eingespielt.';
+  if(n<4)return 'Für die Auslosung braucht es mindestens 4 Spieler mit Haken.';
+  if(!sz)return (L?'Zu wenige Bahnen: ':'Bitte stelle die Bahnen ein: ')+'Für '+n+' Spieler braucht es im Modus '+modeName(S.mode)+' mindestens '+minLanes(n,S.mode)+' Bahnen.';
+  return 'Aufteilung: '+describe(sz)+' · '+needLanes(sz,S.mode)+' von '+L+' Bahnen belegt.'+(S.mode==2&&sz.length<baseSizes(n,2).length?' Wegen der Bahnen werden mehr Sechsergruppen (Tripletten) gebildet.':'');
+}
+/* Bahnen, Modus und Teilnahme ändern nur die betroffenen Elemente, nicht die ganze Seite (kein Ruckeln) */
+function updLanes(){
+  const lv=$('lv'),dr=$('draw'),li=$('linfo');
+  if(!lv||!dr||!li||!lv.setAttribute){render();return}
+  const n=S.players.filter(p=>p.on).length,L=S.lanes||0,d=cur(),busy=d&&d.st<3;
+  const sz=n>=4?sizes(n,S.mode,L):null;
+  lv.textContent=L;
+  $('lminus').disabled=L<1;$('lplus').disabled=L>=99;
+  dr.disabled=!!(n<4||busy||!sz);
+  dr.textContent='Spieltag auslosen ('+n+' dabei)';
+  li.textContent=modeInfo(n,L,sz,busy,d);
+  queue();
+}
+function describe(sz){
+  return [4,5,6,3].map(k=>[k,sz.filter(x=>x==k).length]).filter(x=>x[1]).map(x=>x[1]+' × '+sizeName[x[0]]).join(', ');
+}
+/* Paarungen wie in der Excel-Vorlage: [Team A, Team B, Runde, Freilos?] */
+function plan(k,mode){
+  if(k==3)return [[[0],[1],1],[[2],[],1,1],[[0],[2],2],[[1],[],2,1],[[1],[2],3],[[0],[],3,1]];
+  if(mode==2){
+    if(k==4)return [[[0,1],[2,3],1],[[0,2],[1,3],2],[[0,3],[1,2],3]];
+    if(k==5)return [[[0,1],[2,3,4],1],[[0,2,4],[1,3],2],[[0,2],[1,3,4],3]];
+    return [[[0,1,2],[3,4,5],1],[[0,2,4],[1,3,5],2],[[0,1,3],[2,4,5],3]];
+  }
+  if(k==4)return [[[0],[3],1],[[1],[2],1],[[0],[2],2],[[1],[3],2],[[0],[1],3],[[2],[3],3]];
+  if(k==5)return [[[0],[3],1],[[1],[2],1],[[4],[],1,1],[[0],[2],2],[[1],[4],2],[[3],[],2,1],[[0],[1],3],[[3],[4],3],[[2],[],3,1]];
+  return [[[0],[5],1],[[1],[4],1],[[2],[3],1],[[0],[3],2],[[1],[2],2],[[4],[5],2],[[0],[1],3],[[2],[4],3],[[3],[5],3]];
+}
+function wins(d){
+  const w={};
+  d.groups.forEach(g=>{g.ids.forEach(i=>w[i]=0);g.m.forEach(m=>{if(m.w)(m.w=='a'?m.a:m.b).forEach(i=>w[i]++)})});
+  return w;
+}
+function auslosen(){
+  const on=S.players.filter(p=>p.on);
+  const ord=on.map(p=>({p,r:Math.random()})).sort((a,b)=>(b.p.pts-a.p.pts)||(b.r-a.r)).map(x=>x.p.id);
+  let i=0;
+  const sz=sizes(ord.length,S.mode,S.lanes);
+  if(!sz)return;
+  const groups=sz.map(k=>{
+    const ids=ord.slice(i,i+k);i+=k;
+    return{k,ids,m:plan(k,S.mode).map(([a,b,r,bye])=>({a:a.map(x=>ids[x]),b:b.map(x=>ids[x]),r,bye:!!bye,w:bye?'a':null}))};
+  });
+  S.days.push({n:S.days.reduce((m,x)=>Math.max(m,x.n),0)+1,mode:S.mode,st:1,lanes:S.lanes,groups});
+  dayN=null;tab='d';render();
+}
+function allSet(d){return d.groups.every(g=>g.m.every(m=>m.w))}
+function post(d){
+  const w=wins(d);
+  S.players.forEach(p=>{if(p.id in w){const pt=PT[w[p.id]];p.pts+=pt;p.h=p.h||{};p.h[d.n]=pt}});
+  S.players=S.players.map((p,i)=>({p,i})).sort((a,b)=>(b.p.pts-a.p.pts)||(a.i-b.i)).map(x=>x.p);
+  d.st=3;
+}
+
+/* ---------- Ansichten ---------- */
+function head(){
+  const role=roles.super?'Superadministrator':roles.vereine.length?'Projektadministrator':'Konto';
+  return '<header class="top"><a class="brand" href="#/">Boule</a>'+(sess?'<button class="b" data-a="lo">Abmelden</button>':'<button class="b" data-a="lg">Anmelden</button>')+'</header>'
+    +(sess?'<p class="sub who">'+esc(sess.email)+' · '+role+' · <a href="#/konto">Passwort ändern</a></p>':'');
+}
+function crumb(){
+  if(R.v=='verein'&&V)return '<div class="crumb"><a href="#/">Vereine</a> › '+esc(V.name)+'</div>';
+  if(R.v=='proj'&&V&&P)return '<div class="crumb"><a href="#/">Vereine</a> › <a href="#/v/'+esc(V.slug)+'">'+esc(V.name)+'</a> › '+esc(P.name)+'</div>';
+  return '';
+}
+function vHome(){
+  let h='<h1>Vereine</h1>';
+  if(!list.length)h+='<div class="card"><p class="sub">Noch keine Vereine.</p></div>';
+  list.forEach(v=>{h+='<div class="card row2"><a class="grow" href="#/v/'+esc(v.slug)+'">'+esc(v.name)+'</a>'+(roles.super?'<button class="b" data-a="delv" data-id="'+v.id+'">'+lbl('v'+v.id,'Löschen')+'</button>':'')+'</div>'});
+  if(roles.super)h+='<div class="card"><h2>Neuer Verein</h2><div class="bar"><input type="text" id="nv" placeholder="Name des Vereins" autocomplete="off"><button class="b pri" data-a="addv">Anlegen</button></div></div>';
+  return h;
+}
+function srcBar(){
+  const sm=projs.filter(p=>p.typ=='supermelee');
+  if(!sm.length)return '';
+  return '<div class="bar" id="srcbar" hidden><label for="nsrc">Spieler übernehmen aus</label><select id="nsrc"><option value="">niemandem (leer starten)</option>'+sm.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('')+'</select></div>';
+}
+function vVerein(){
+  const ed=canVerein(V.id);
+  let h='<h1>'+esc(V.name)+'</h1><h2>Projekte</h2>';
+  if(!projs.length)h+='<div class="card"><p class="sub">Noch keine Projekte.</p></div>';
+  projs.forEach(p=>{h+='<div class="card row2"><a class="grow" href="#/v/'+esc(V.slug)+'/p/'+esc(p.slug)+'">'+esc(p.name)+'<span class="tag">'+esc(TYP[p.typ]||p.typ)+'</span></a>'+(ed?'<button class="b" data-a="delp" data-id="'+p.id+'">'+lbl('p'+p.id,'Löschen')+'</button>':'')+'</div>'});
+  if(ed)h+='<div class="card"><h2>Neues Projekt</h2><div class="bar"><input type="text" id="np" placeholder="Name des Projekts" autocomplete="off"></div><div class="bar"><select id="nt" aria-label="Art"><option value="kreisel">Kreisel</option><option value="supermelee">Supermêlée</option></select><button class="b pri" data-a="addp">Anlegen</button></div>'+srcBar()+'</div>';
+  if(roles.super){
+    h+='<div class="card"><h2>Projektadministratoren</h2>';
+    if(!admins.length)h+='<p class="sub">Noch keine.</p>';
+    admins.forEach(a=>{h+='<div class="row"><span class="n">'+esc(a.email)+'</span><button class="b" data-a="rma" data-uid="'+a.user_id+'">Entfernen</button></div>'});
+    h+='<div class="bar"><input type="email" id="ae" placeholder="E-Mail der Person" autocomplete="off"><button class="b" data-a="adda">Hinzufügen</button></div><p class="sub">Die Person muss vorher im Supabase-Dashboard unter Authentication › Users › Invite user eingeladen worden sein.</p></div>';
+  }
+  return h;
+}
+function vLogin(){
+  return '<h1>Anmelden</h1><div class="card"><div class="bar"><input type="email" id="em" placeholder="E-Mail" autocomplete="username" value="'+esc(lastEmail)+'"></div><div class="bar"><input type="password" id="pw" placeholder="Passwort" autocomplete="current-password"></div><div class="bar"><button class="b pri" data-a="li">Anmelden</button><button class="b" data-a="fp">Passwort vergessen</button></div></div>';
+}
+function vKonto(){
+  if(!sess)return '<h1>Passwort</h1><div class="card"><p class="sub">Bitte melde dich zuerst an.</p></div>';
+  return '<h1>Passwort festlegen</h1>'+(pwFlow?'<p class="sub">'+esc(pwFlow)+'</p>':'')+'<div class="card"><div class="bar"><input type="password" id="p1" placeholder="Neues Passwort (mind. 8 Zeichen)" autocomplete="new-password"></div><div class="bar"><input type="password" id="p2" placeholder="Wiederholen" autocomplete="new-password"></div><div class="bar"><button class="b pri" data-a="sp">Speichern</button></div></div>';
+}
+function vProj(){
+  const t=(k,n)=>'<button role="tab" data-t="'+k+'" aria-selected="'+(tab==k)+'">'+n+'</button>';
+  if(P.typ!='kreisel'&&P.typ!='supermelee')return '<h1>'+esc(P.name)+'</h1><div class="card"><p class="sub">Unbekannte Art: '+esc(P.typ)+'.</p></div>';
+  const sm=P.typ=='supermelee';
+  return '<h1>'+esc(P.name)+'</h1><p class="sub" id="sub"></p><nav class="tabs" role="tablist">'+t('p','Spieler')+t('d',sm?'Turnier':'Spieltag')+t('i','Mehr')+'</nav>'+(tab=='p'?(sm?vSMplayers():vPlayers()):tab=='d'?(sm?vSMday():vDay()):(sm?vSMinfo():vInfo()));
+}
+function vPlayers(){
+  const d=cur(),busy=d&&d.st<3,n=S.players.filter(p=>p.on).length,ed=canEdit();
+  let h='';
+  if(ed){
+    h+='<div class="card"><h2>Neuer Spieler</h2><div class="bar"><input type="text" id="nn" placeholder="Name" autocomplete="off"><button class="b" id="add">Hinzufügen</button></div></div>';
+    h+='<div class="card"><h2>Modus</h2><div class="seg" role="group"><button data-m="1" aria-pressed="'+(S.mode==1)+'">Tête</button><button data-m="2" aria-pressed="'+(S.mode==2)+'">Dublette</button></div>';
+    const L=S.lanes||0,sz=n>=4?sizes(n,S.mode,L):null;
+    h+='<div class="bar"><span>Bahnen</span><span class="stepper"><button class="b" id="lminus" data-l="-1" aria-label="Eine Bahn weniger"'+(L<1?' disabled':'')+'>−</button><b id="lv" aria-live="polite">'+L+'</b><button class="b" id="lplus" data-l="1" aria-label="Eine Bahn mehr"'+(L>=99?' disabled':'')+'>+</button></span></div>';
+    h+='<div class="bar"><button class="b pri" id="draw"'+((n<4||busy||!sz)?' disabled':'')+'>Spieltag auslosen ('+n+' dabei)</button></div>';
+    h+='<div class="warn" id="linfo">'+modeInfo(n,L,sz,busy,d)+'</div>';
+    h+='</div>';
+  }
+  h+='<div class="card"><h2>Gesamtwertung</h2>';
+  if(!S.players.length)h+='<p class="sub">Noch keine Spieler.</p>';
+  S.players.forEach(p=>{
+    const hs=Object.keys(p.h||{}).sort((a,b)=>b-a).slice(0,3).map(k=>p.h[k]).join(' | ');
+    h+='<div class="row">'+(ed?'<input type="checkbox" data-id="'+p.id+'" '+(p.on?'checked':'')+' aria-label="'+esc(p.name)+' nimmt teil">':'')+'<span class="n">'+esc(p.name)+'</span><span class="h">'+hs+'</span><span class="p">'+p.pts+'</span>'+(ed?'<button class="b" data-del="'+p.id+'" aria-label="'+esc(p.name)+' entfernen">×</button>':'')+'</div>';
+  });
+  return h+'</div>';
+}
+function vDay(){
+  const d=sel();
+  if(!d)return'<div class="card"><p class="sub">Noch kein Spieltag.</p></div>';
+  const ed=canEdit(),lock=d.st>1||!ed;
+  let h='';
+  if(S.days.length>1)h+='<div class="card"><h2>Spieltag ansehen</h2><div class="bar"><select id="dsel" aria-label="Spieltag auswählen">'+S.days.slice().reverse().map(x=>'<option value="'+x.n+'"'+(x.n===d.n?' selected':'')+'>Spieltag '+x.n+' · '+modeName(x.mode)+' · '+ST[x.st]+'</option>').join('')+'</select></div></div>';
+  h+='<div class="card"><h2>Spieltag '+d.n+' · '+modeName(d.mode)+(d.lanes?' · '+d.lanes+' Bahnen':'')+'</h2><span class="tag" style="margin-left:0">Status '+d.st+': '+ST[d.st]+'</span></div>';
+  d.groups.forEach((g,gi)=>{
+    h+='<div class="card"><h2>Gruppe '+(gi+1)+' ('+g.k+' Spieler)</h2>';
+    let lr=null;
+    g.m.forEach((m,mi)=>{
+      if(m.r&&m.r!==lr){lr=m.r;h+='<p class="rh">Runde '+m.r+'</p>'}
+      if(m.bye){h+='<div class="match"><div class="byeb">'+team(m.a)+'</div><span class="vs">Freilos</span><span class="vs">zählt als Sieg</span></div>';return}
+      h+='<div class="match"><button class="team" data-g="'+gi+'" data-m="'+mi+'" data-s="a" aria-pressed="'+(m.w=='a')+'"'+(lock?' disabled':'')+'>'+team(m.a)+'</button><span class="vs">gegen</span><button class="team" data-g="'+gi+'" data-m="'+mi+'" data-s="b" aria-pressed="'+(m.w=='b')+'"'+(lock?' disabled':'')+'>'+team(m.b)+'</button></div>';
+    });
+    h+='</div>';
+  });
+  const w=wins(d),rows=Object.keys(w).map(Number).sort((a,b)=>w[b]-w[a]);
+  h+='<div class="card"><h2>'+(d.st==3?'Ergebnis':'Zwischenstand')+'</h2><div class="scroll"><table><tr><th>Name</th><th>Siege</th><th>Punkte</th></tr>'+rows.map(i=>'<tr><td>'+esc(nm(i))+'</td><td>'+w[i]+'</td><td>'+PT[w[i]]+'</td></tr>').join('')+'</table></div>';
+  if(ed){
+    if(d.st==1)h+='<div class="bar"><button class="b pri" id="chk"'+(allSet(d)?'':' disabled')+'>Ergebnisse prüfen</button></div>'+(allSet(d)?'':'<div class="warn">Tippe pro Begegnung auf das Siegerteam.</div>');
+    if(d.st==2)h+='<div class="bar"><button class="b" id="back">Zurück zur Eingabe</button><button class="b pri" id="post">In Gesamtwertung einspielen</button></div>';
+    if(d.st<3)h+='<div class="bar"><button class="b" id="delday" data-n="'+d.n+'">'+lbl('day'+d.n,'Spieltag löschen')+'</button></div>';
+  }
+  if(d.st==3)h+='<div class="warn">Dieser Spieltag ist in der Gesamtwertung verbucht.</div>';
+  return h+'</div>';
+}
+function vInfo(){
+  let h='<div class="card"><h2>So wird gewertet</h2><ul><li>Gruppen werden nach Gesamtpunkten gebildet, bei Gleichstand entscheidet das Los.</li><li>Ein Spieltag kann gelöscht werden, solange er noch nicht in die Gesamtwertung eingespielt ist.</li><li>Pro Spieler zählen die Siege: 3 Siege = +8, 2 = +2, 1 = −2, 0 = −8 Punkte.</li><li>Gruppengrößen: Der Rest der Spielerzahl durch 4 bestimmt Vierer-, Fünfer-, Sechser- oder Dreiergruppen. Bei Dublette mit genau 7 Spielern gibt es Vierer plus Dreier.</li></ul></div>'
+   +'<div class="card"><h2>Paarungen</h2><ul><li>Es gibt immer 3 Runden. Dublette: Vierer 2 gegen 2, Fünfer 2 gegen 3, Sechser 3 gegen 3, Partner wechseln jede Runde.</li><li>Tête: Vierer und Sechser spielen jeder gegen jeden in drei Runden, bei Fünfern und Dreiern setzt pro Runde einer aus.</li><li>Ein Freilos zählt als Sieg.</li><li>Bahnen: In jeder Runde belegt jede Begegnung eine Bahn. Dublette braucht eine Bahn je Gruppe, Tête eine Bahn je zwei Spieler. Reichen bei Dublette die Bahnen nicht, werden Vierer zu Sechsergruppen zusammengelegt.</li></ul></div>';
+  if(canEdit())h+='<div class="card"><h2>Daten</h2><div class="bar"><button class="b" id="reset">'+lbl('reset','Spieler und Spieltage löschen')+'</button></div></div>';
+  return h;
+}
+function sub(){
+  const e=$('sub');if(!e||!S||!S.players)return;
+  const d=cur();
+  e.textContent=S.players.length+' Spieler'+(d?(P.typ=='supermelee'?' · Turnier '+(smDone(d)?'abgeschlossen':'läuft'):' · Spieltag '+d.n+' ('+ST[d.st]+')'):'')+' · '+(canEdit()?'Bearbeiten':'Ansicht')+(net=='save'?' · speichert …':net.startsWith('err')?' · Fehler: '+net.slice(4):'');
+}
+function render(){
+  let body;
+  if(err)body='<div class="warn">'+esc(err)+'</div>';
+  else if(R.v=='home')body=vHome();
+  else if(R.v=='verein')body=vVerein();
+  else if(R.v=='proj')body=vProj();
+  else if(R.v=='login')body=vLogin();
+  else body=vKonto();
+  $('app').innerHTML=head()+crumb()+'<div class="warn" id="msg" hidden></div>'+body;
+  if(R.v=='proj'&&!err){sub();if(canEdit())queue()}
+}
+
+/* ---------- Supermêlée ---------- */
+smName={4:'Dublette',5:'Fünfer (2 gegen 3)',6:'Triplette'};
+const smSizes=(n,L)=>(n<4||n==7)?null:sizes(n,2,L);
+const smCur=()=>S.days.length?S.days[S.days.length-1]:null;
+const smOk=g=>Number.isInteger(g.sa)&&Number.isInteger(g.sb)&&g.sa!==g.sb;
+const smDone=d=>d.rounds.every(r=>r.groups.every(smOk));
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const smDescr=sz=>[4,5,6].map(k=>[k,sz.filter(x=>x==k).length]).filter(x=>x[1]).map(x=>x[1]+' × '+smName[x[0]]).join(', ');
+const sgn=x=>x>0?'+'+x:String(x);
+function smInfo(n,L,sz,d){
+  if(d)return smDone(d)?'Das Turnier ist abgeschlossen.':'Das Turnier läuft. Für eine neue Auslosung muss es zuerst gelöscht werden.';
+  if(n<4)return 'Für die Auslosung braucht es mindestens 4 Spieler mit Haken.';
+  if(n==7)return 'Mit genau 7 Spielern geht die Auslosung nicht auf. Bitte einen Spieler dazu- oder wegnehmen.';
+  if(!sz)return (L?'Zu wenige Bahnen: ':'Bitte stelle die Bahnen ein: ')+'Für '+n+' Spieler braucht es mindestens '+Math.ceil(n/6)+' Bahnen.';
+  return 'Aufteilung je Runde: '+smDescr(sz)+' · '+sz.length+' von '+L+' Bahnen belegt.'+(sz.length<baseSizes(n,2).length?' Wegen der Bahnen werden mehr Tripletten (3 gegen 3) gebildet.':'');
+}
+/* Mischen: pro Runde bis zu 10 Versuche. Wiederholungsfaktor = Summe, wie oft die neuen Paarungen
+   (gleiche Mitspieler bzw. gleiche Gegner) in früheren Runden schon vorkamen, geteilt durch die Zahl aller Paarungen der Runde.
+   0 = nichts wiederholt. Genommen wird der Versuch mit dem kleinsten Faktor. */
+const SM_TRIES=10,pk=(x,y)=>x<y?x+'-'+y:y+'-'+x;
+function smTry(ids,sz,L,mem){
+  const o=shuf(ids),bn=shuf(Array.from({length:L},(_,i)=>i+1));let i=0,rep=0,tot=0;
+  const gs=sz.map((k,gi)=>{
+    const g=o.slice(i,i+k);i+=k;const h=Math.floor(k/2),a=g.slice(0,h),b=g.slice(h);
+    const same=(t,m)=>{for(let x=0;x<t.length;x++)for(let y=x+1;y<t.length;y++){tot++;rep+=m[pk(t[x],t[y])]||0}};
+    same(a,mem.p);same(b,mem.p);
+    a.forEach(x=>b.forEach(y=>{tot++;rep+=mem.o[pk(x,y)]||0}));
+    return{k,bahn:bn[gi],a,b,sa:null,sb:null};
+  });
+  gs.sort((x,y)=>x.bahn-y.bahn);
+  return{groups:gs,f:tot?rep/tot:0};
+}
+function smDraw(){
+  if(smCur())return;
+  const ids=S.players.filter(p=>p.on).map(p=>p.id),sz=smSizes(ids.length,S.lanes||0);
+  if(!sz)return;
+  const rounds=[],mem={p:{},o:{}};
+  for(let r=1;r<=S.rounds;r++){
+    let best=null,tries=0;
+    while(tries<SM_TRIES){
+      const c=smTry(ids,sz,S.lanes,mem);tries++;
+      if(!best||c.f<best.f){best=c;best.v=tries}
+      if(c.f===0)break;
+    }
+    best.groups.forEach(g=>{
+      const same=(t,m)=>{for(let x=0;x<t.length;x++)for(let y=x+1;y<t.length;y++){const k=pk(t[x],t[y]);m[k]=(m[k]||0)+1}};
+      same(g.a,mem.p);same(g.b,mem.p);g.a.forEach(x=>g.b.forEach(y=>{const k=pk(x,y);mem.o[k]=(mem.o[k]||0)+1}));
+    });
+    rounds.push({r,groups:best.groups,f:Math.round(best.f*100)/100,v:best.v,t:tries});
+  }
+  S.days=[{n:1,st:1,lanes:S.lanes,rounds}];
+  tab='d';render();
+}
+function smStats(days){
+  const s={};
+  S.players.forEach(p=>s[p.id]={id:p.id,sp:0,w:0,pl:0,mi:0});
+  days.forEach(d=>d.rounds.forEach(r=>r.groups.forEach(g=>{
+    if(!smOk(g))return;
+    [[g.a,g.sa,g.sb],[g.b,g.sb,g.sa]].forEach(([ids,f,a])=>ids.forEach(i=>{const x=s[i];if(!x)return;x.sp++;x.pl+=f;x.mi+=a;if(f>a)x.w++}))
+  })));
+  return Object.values(s).sort((a,b)=>(b.w-a.w)||((b.pl-b.mi)-(a.pl-a.mi))||(b.pl-a.pl)||nm(a.id).localeCompare(nm(b.id),'de'));
+}
+function smTable(d){
+  const ids=new Set();d.rounds.forEach(r=>r.groups.forEach(g=>g.a.concat(g.b).forEach(i=>ids.add(i))));
+  const rows=smStats([d]).filter(x=>ids.has(x.id));
+  return '<div class="scroll"><table><tr><th>Platz</th><th>Name</th><th>Spiele</th><th>Siege</th><th>Punkte</th><th>Diff.</th></tr>'+rows.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(nm(x.id))+'</td><td>'+x.sp+'</td><td>'+x.w+'</td><td>'+x.pl+' : '+x.mi+'</td><td>'+sgn(x.pl-x.mi)+'</td></tr>').join('')+'</table></div>';
+}
+const stp=(lab,k,attr,v,lo,hi)=>'<div class="bar"><span>'+lab+'</span><span class="stepper"><button class="b" id="'+k+'minus" data-'+attr+'="-1" aria-label="'+lab+' weniger"'+(v<=lo?' disabled':'')+'>−</button><b id="'+k+'v" aria-live="polite">'+v+'</b><button class="b" id="'+k+'plus" data-'+attr+'="1" aria-label="'+lab+' mehr"'+(v>=hi?' disabled':'')+'>+</button></span></div>';
+function updSM(){
+  const lv=$('lv'),dr=$('draw'),li=$('linfo');
+  if(!lv||!dr||!li||!lv.setAttribute){render();return}
+  const n=S.players.filter(p=>p.on).length,L=S.lanes||0,d=smCur(),sz=smSizes(n,L);
+  lv.textContent=L;$('rv').textContent=S.rounds;
+  $('lminus').disabled=L<1;$('lplus').disabled=L>=99;$('rminus').disabled=S.rounds<=1;$('rplus').disabled=S.rounds>=9;
+  dr.disabled=!!(!sz||d);dr.textContent='Turnier auslosen ('+n+' dabei)';
+  li.textContent=smInfo(n,L,sz,d);queue();
+}
+function updRes(){
+  const d=sel(),e=$('stand');if(!d||!e)return;
+  e.innerHTML=smTable(d);
+  const ok=smDone(d);
+  if($('standh'))$('standh').textContent=ok?'Endergebnis':'Zwischenstand';
+  if($('stag'))$('stag').textContent=ok?'abgeschlossen':'läuft';
+  if($('delday'))$('delday').hidden=ok;
+  if($('finw'))$('finw').hidden=ok;
+  queue();
+}
+function vSMplayers(){
+  const d=smCur(),n=S.players.filter(p=>p.on).length,ed=canEdit(),L=S.lanes||0,sz=smSizes(n,L);
+  let h='';
+  if(ed){
+    h+='<div class="card"><h2>Neuer Spieler</h2><div class="bar"><input type="text" id="nn" placeholder="Name" autocomplete="off"><button class="b" id="add">Hinzufügen</button></div></div>';
+    h+='<div class="card"><h2>Turnier</h2>'+stp('Bahnen','l','l',L,0,99)+stp('Runden','r','rr',S.rounds,1,9);
+    h+='<div class="bar"><button class="b pri" id="draw"'+((!sz||d)?' disabled':'')+'>Turnier auslosen ('+n+' dabei)</button></div>';
+    h+='<div class="warn" id="linfo">'+smInfo(n,L,sz,d)+'</div></div>';
+  }
+  h+='<div class="card"><h2>Spieler</h2>';
+  if(!S.players.length)h+='<p class="sub">Noch keine Spieler.</p>';
+  S.players.forEach(p=>{
+    h+='<div class="row">'+(ed?'<input type="checkbox" data-id="'+p.id+'" '+(p.on?'checked':'')+' aria-label="'+esc(p.name)+' nimmt teil"'+(d?' disabled':'')+'>':'')+'<span class="n">'+esc(p.name)+'</span>'+(ed?'<button class="b" data-del="'+p.id+'" aria-label="'+esc(p.name)+' entfernen">×</button>':'')+'</div>';
+  });
+  return h+'</div>';
+}
+function vSMday(){
+  const d=sel();
+  if(!d)return'<div class="card"><p class="sub">Noch nicht ausgelost.</p></div>';
+  const ed=canEdit(),ok=smDone(d);
+  let h='<div class="card"><h2>'+d.rounds.length+' Runden'+(d.lanes?' · '+d.lanes+' Bahnen':'')+'</h2><span class="tag" id="stag" style="margin-left:0">'+(ok?'abgeschlossen':'läuft')+'</span></div>';
+  const inp=(ri,gi,s,v)=>!ed?'<span class="scv">'+(v==null?'–':v)+'</span>':'<input type="number" class="sc" inputmode="numeric" min="0" max="99" data-r="'+ri+'" data-g="'+gi+'" data-s="'+s+'" value="'+(v==null?'':v)+'" aria-label="Punkte">';
+  h+='<details class="card"><summary><b>Was bedeutet der Wiederholungsfaktor?</b></summary><ul><li>Er zeigt, wie sehr eine Runde Paarungen aus früheren Runden wiederholt, im Schnitt je Paarung der Runde.</li><li>Gezählt wird, wie oft zwei Spieler schon zusammen im Team standen oder schon gegeneinander gespielt haben.</li><li><b>0</b> heißt: Alle Mitspieler und Gegner sind neu. <b>0,5</b> heißt: im Schnitt kam jede zweite Paarung schon einmal vor. Über 1 heißt: Paarungen kamen im Schnitt mehrfach vor.</li><li>Jede Runde wurde bis zu 10 Mal gemischt. Angezeigt wird der Faktor der Mischung, die genommen wurde, also der niedrigste aller Versuche.</li><li>Bei wenigen Spielern oder vielen Runden gibt es gar nicht genug verschiedene Konstellationen, dann bleibt der Faktor über 0.</li></ul></details>';
+  d.rounds.forEach((rd,ri)=>{
+    h+='<div class="card"><h2>Runde '+rd.r+'</h2>'+(rd.f!=null?'<p class="sub">Wiederholungsfaktor: <b>'+String(rd.f).replace('.',',')+'</b>'+(ri?(rd.f===0?' (nichts wiederholt)':'')+' · bester von '+rd.t+(rd.t==1?' Versuch':' Versuchen')+' (Versuch '+rd.v+')':' (erste Runde, noch nichts zu wiederholen)')+'</p>':'');
+    rd.groups.forEach((g,gi)=>{
+      h+='<p class="rh">Bahn '+g.bahn+' · '+smName[g.k]+'</p><div class="smatch"><div>'+team(g.a)+'</div><div class="scs">'+inp(ri,gi,'a',g.sa)+'<span>:</span>'+inp(ri,gi,'b',g.sb)+'</div><div class="r">'+team(g.b)+'</div></div>';
+    });
+    h+='</div>';
+  });
+  h+='<div class="card"><h2 id="standh">'+(ok?'Endergebnis':'Zwischenstand')+'</h2><div id="stand">'+smTable(d)+'</div>';
+  if(ed){
+    h+='<div class="warn" id="finw"'+(ok?' hidden':'')+'>Trage in jeder Begegnung beide Ergebnisse ein. Ein Unentschieden gibt es nicht. Nach der letzten Runde ist das Turnier abgeschlossen.</div>';
+    h+='<div class="bar"><button class="b" id="delday"'+(ok?' hidden':'')+'>'+lbl('day','Turnier löschen')+'</button></div>';
+  }
+  return h+'</div>';
+}
+function vSMinfo(){
+  let h='<div class="card"><h2>So läuft das Turnier</h2><ul><li>Ein Supermêlée ist in sich abgeschlossen: Es wird einmal ausgelost und ist beendet, sobald alle Runden gespielt und eingetragen sind.</li><li>Vor jeder Runde werden alle Mitspielenden neu gemischt, bis zu 10 Versuche. Für jeden Versuch gilt ein Wiederholungsfaktor: wie oft gleiche Mitspieler oder gleiche Gegner aus früheren Runden wieder zusammenkommen, im Schnitt je Paarung. 0 heißt: nichts wiederholt. Genommen wird der Versuch mit dem kleinsten Faktor, bei 0 wird sofort aufgehört. Die Bahnen werden zufällig verteilt.</li><li>Gruppen: Der Rest der Spielerzahl durch 4 bestimmt Dublette (2 gegen 2), Fünfer (2 gegen 3) oder Triplette (3 gegen 3). Es braucht mindestens 4 Spieler, genau 7 gehen nicht auf.</li><li>Es werden so viele Dubletten wie möglich gebildet. Fünfer oder Tripletten entstehen nur, wenn die Spielerzahl es erfordert oder die Bahnen nicht für mehr Gruppen reichen. Jede Gruppe belegt eine Bahn. Reicht es auch dann nicht, ist die Auslosung gesperrt.</li></ul></div>'
+   +'<div class="card"><h2>Wertung</h2><ul><li>Pro Begegnung werden beide Ergebnisse eingetragen. Wer mehr Punkte hat, gewinnt.</li><li>Die Platzierung ordnet nach Siegen, danach nach Punktedifferenz (erzielte minus kassierte Punkte).</li><li>Ein Turnier kann gelöscht und neu ausgelost werden, solange es nicht abgeschlossen ist.</li></ul></div>';
+  if(canEdit())h+='<div class="card"><h2>Daten</h2><div class="bar"><button class="b" id="reset">'+lbl('reset','Spieler und Turnier löschen')+'</button></div></div>';
+  return h;
+}
+function smClick(t){
+  if(t.id=='add'){const i=$('nn'),v=(i.value||'').trim();if(v&&!S.players.some(p=>p.name.toLowerCase()==v.toLowerCase()))S.players.push({id:Date.now()+Math.floor(Math.random()*1000),name:v,on:true});render();return}
+  if(t.dataset.l){S.lanes=Math.max(0,Math.min(99,(S.lanes||0)+(+t.dataset.l)));updSM();return}
+  if(t.dataset.rr){S.rounds=Math.max(1,Math.min(9,(S.rounds||3)+(+t.dataset.rr)));updSM();return}
+  if(t.dataset.del){const p=S.players.find(p=>p.id==t.dataset.del);if(p&&!S.days.some(d=>d.rounds.some(r=>r.groups.some(g=>g.a.includes(p.id)||g.b.includes(p.id)))))S.players=S.players.filter(x=>x!==p);else if(p)p.on=false;render();return}
+  if(t.id=='draw'){smDraw();return}
+  if(t.id=='delday'){
+    const d=smCur();if(!d||smDone(d))return;
+    if(!confirm2('day','Löscht das Turnier mit allen eingetragenen Ergebnissen. Tippe zur Bestätigung noch einmal.'))return;
+    S.days=[];tab='p';render();return;
+  }
+  if(t.id=='reset'){if(!confirm2('reset','Löscht alle Spieler und das Turnier dieses Projekts. Tippe zur Bestätigung noch einmal.'))return;S.players=[];S.days=[];tab='p';render()}
+}
+
+/* ---------- Aktionen ---------- */
+async function act(a,t){
+  if(a=='lg'){back=location.hash||'#/';if(back=='#/login')back='#/';location.hash='#/login';return}
+  if(a=='lo'){const tk=sess&&sess.at;clearSess();if(tk)api('/auth/v1/logout',{method:'POST'},tk).catch(()=>{});route();return}
+  if(a=='li'){
+    const em=val('em'),pw=raw('pw');lastEmail=em;
+    if(!em||!pw){flash('Bitte E-Mail und Passwort eingeben.');return}
+    flash('Anmelden …');
+    try{setSess(await api('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:em,password:pw})}),em)}
+    catch(x){flash(/invalid/i.test(x.message)?'E-Mail oder Passwort stimmt nicht.':'Fehler: '+x.message);return}
+    await loadRoles();go(back&&back!='#/login'?back:'#/');return;
+  }
+  if(a=='fp'){
+    const em=val('em');if(!em){flash('Bitte zuerst deine E-Mail eintragen.');return}
+    await api('/auth/v1/recover',{method:'POST',body:JSON.stringify({email:em})});
+    flash('Falls die Adresse bekannt ist, kommt gleich eine E-Mail mit einem Link.');return;
+  }
+  if(a=='sp'){
+    const p1=raw('p1'),p2=raw('p2');
+    if(p1.length<8){flash('Das Passwort braucht mindestens 8 Zeichen.');return}
+    if(p1!==p2){flash('Die beiden Passwörter sind nicht gleich.');return}
+    const tk=await token();if(!tk){flash('Bitte zuerst anmelden.');return}
+    await api('/auth/v1/user',{method:'PUT',body:JSON.stringify({password:p1})},tk);
+    const was=pwFlow;pwFlow='';
+    if(was){await loadRoles();go('#/')}else flash('Passwort gespeichert.');
+    return;
+  }
+  if(a=='addv'){
+    if(!roles.super)return;
+    const name=val('nv');if(!name){flash('Bitte einen Namen eingeben.');return}
+    const j=await rest('vereine',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({name,slug:slug(name)})});
+    if(!j||!j.length)throw new Error('Anlegen nicht erlaubt.');
+    await route();return;
+  }
+  if(a=='delv'){
+    if(!roles.super)return;
+    const id=t.dataset.id;
+    if(!confirm2('v'+id,'Löscht den Verein samt allen Projekten. Tippe zur Bestätigung noch einmal.'))return;
+    const j=await rest('vereine?id=eq.'+id,{method:'DELETE',headers:{Prefer:'return=representation'}});
+    if(!j||!j.length)throw new Error('Löschen nicht erlaubt.');
+    await route();return;
+  }
+  if(a=='addp'){
+    if(!V||!canVerein(V.id))return;
+    const name=val('np'),typ=val('nt')||'kreisel';
+    if(!name){flash('Bitte einen Namen eingeben.');return}
+    let pl=[];
+    if(typ=='supermelee'&&val('nsrc')){
+      const q=await rest('projekte?select=daten&id=eq.'+encodeURIComponent(val('nsrc'))+'&verein_id=eq.'+V.id);
+      const old=(q&&q[0]&&q[0].daten&&q[0].daten.players)||[],t0=Date.now();
+      pl=old.map((p,i)=>({id:t0+i,name:p.name,on:true}));
+    }
+    const j=await rest('projekte',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({verein_id:V.id,name,slug:slug(name),typ,daten:typ=='kreisel'?{players:[],mode:2,days:[]}:{players:pl,lanes:0,rounds:3,days:[]}})});
+    if(!j||!j.length)throw new Error('Anlegen nicht erlaubt.');
+    await route();return;
+  }
+  if(a=='delp'){
+    if(!V||!canVerein(V.id))return;
+    const id=t.dataset.id;
+    if(!confirm2('p'+id,'Löscht das Projekt samt allen Daten. Tippe zur Bestätigung noch einmal.'))return;
+    const j=await rest('projekte?id=eq.'+id,{method:'DELETE',headers:{Prefer:'return=representation'}});
+    if(!j||!j.length)throw new Error('Löschen nicht erlaubt.');
+    await route();return;
+  }
+  if(a=='adda'){
+    if(!roles.super||!V)return;
+    const mail=val('ae');if(!mail){flash('Bitte eine E-Mail eingeben.');return}
+    await rest('rpc/admin_hinzufuegen',{method:'POST',body:JSON.stringify({vid:V.id,mail})});
+    await route();return;
+  }
+  if(a=='rma'){
+    if(!roles.super||!V)return;
+    const j=await rest('verein_admins?verein_id=eq.'+V.id+'&user_id=eq.'+t.dataset.uid,{method:'DELETE',headers:{Prefer:'return=representation'}});
+    if(!j||!j.length)throw new Error('Entfernen nicht erlaubt.');
+    await route();return;
+  }
+}
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.a){try{await act(t.dataset.a,t)}catch(x){flash(msgOf(x))}return}
+  if(t.dataset.t){tab=t.dataset.t;render();return}
+  if(R.v!='proj'||!P||!canEdit())return;
+  if(P.typ=='supermelee'){smClick(t);return}
+  if(P.typ!='kreisel')return;
+  if(t.id=='add'){const i=$('nn'),v=(i.value||'').trim();if(v&&!S.players.some(p=>p.name.toLowerCase()==v.toLowerCase()))S.players.push({id:Date.now()+Math.floor(Math.random()*1000),name:v,pts:0,on:true,h:{}});render();return}
+  if(t.dataset.l){S.lanes=Math.max(0,Math.min(99,(S.lanes||0)+(+t.dataset.l)));updLanes();return}
+  if(t.dataset.m&&t.closest('.seg')){
+    S.mode=+t.dataset.m;
+    const sg=t.closest('.seg');
+    if(sg.querySelectorAll){sg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.m===S.mode)));updLanes()}else render();
+    return;
+  }
+  if(t.dataset.del){const p=S.players.find(p=>p.id==t.dataset.del);if(p&&!S.days.some(d=>d.groups.some(g=>g.ids.includes(p.id))))S.players=S.players.filter(x=>x!==p);else if(p)p.on=false;render();return}
+  if(t.id=='draw'){auslosen();return}
+  if(t.dataset.s){const d=cur();if(!d||d.st!=1)return;const m=d.groups[+t.dataset.g].m[+t.dataset.m];m.w=m.w==t.dataset.s?null:t.dataset.s;render();return}
+  if(t.id=='delday'){
+    const d=S.days.find(x=>x.n==t.dataset.n);if(!d||d.st>=3)return;
+    if(!confirm2('day'+d.n,'Löscht Spieltag '+d.n+' mit allen eingetragenen Ergebnissen. Tippe zur Bestätigung noch einmal.'))return;
+    S.days=S.days.filter(x=>x!==d);dayN=null;render();return;
+  }
+  if(t.id=='chk'){cur().st=2;render();return}
+  if(t.id=='back'){cur().st=1;render();return}
+  if(t.id=='post'){post(cur());tab='p';render();return}
+  if(t.id=='reset'){if(!confirm2('reset','Löscht alle Spieler und Spieltage dieses Projekts. Tippe zur Bestätigung noch einmal.'))return;S.players=[];S.mode=2;S.days=[];tab='p';render()}
+});
+document.addEventListener('change',e=>{const t=e.target;if(t.id=='nt'){const b=$('srcbar');if(b)b.hidden=t.value!='supermelee';return}if(t.id=='dsel'){dayN=+t.value;render();return}if(R.v=='proj'&&canEdit()&&t.dataset&&t.dataset.id){const p=S.players.find(p=>p.id==t.dataset.id);if(p){p.on=t.checked;P.typ=='supermelee'?updSM():updLanes()}}});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(!t.classList||!t.classList.contains('sc')||R.v!='proj'||!P||P.typ!='supermelee'||!canEdit())return;
+  const d=sel();if(!d)return;
+  const g=d.rounds[+t.dataset.r].groups[+t.dataset.g];
+  let v=String(t.value).trim()===''?null:Math.floor(+t.value);
+  if(v!==null&&!(v>=0))v=null;if(v>99)v=99;
+  g[t.dataset.s=='a'?'sa':'sb']=v;
+  if(v===null){if(String(t.value).trim()!=='')t.value=''}else if(String(v)!==String(t.value))t.value=String(v);
+  updRes();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!='Enter')return;
+  const m={nn:'add',nv:null,np:null,ae:null,pw:null,em:null,p2:null};
+  const id=e.target.id;if(!(id in m))return;
+  if(id=='nn'){$('add').click();return}
+  const q={nv:'addv',np:'addp',ae:'adda',pw:'li',em:'li',p2:'sp'}[id];
+  const b=document.querySelector('[data-a="'+q+'"]');if(b)b.click();
+});
+window.addEventListener('hashchange',route);
+
+/* ---------- Start (inkl. Einladungs- und Passwort-Links von Supabase) ---------- */
+(async()=>{
+  const h=location.hash;
+  if(/access_token=|error_description=/.test(h)){
+    const q=new URLSearchParams(h.replace(/^#/,''));
+    if(q.get('access_token')){
+      setSess({access_token:q.get('access_token'),refresh_token:q.get('refresh_token'),expires_in:+q.get('expires_in')||3600});
+      try{const u=await api('/auth/v1/user',{},sess.at);sess.email=u.email;sess.uid=u.id;localStorage.setItem(SKEY,JSON.stringify(sess))}catch(e){}
+      const ty=q.get('type');
+      if(ty=='invite'||ty=='recovery'){
+        pwFlow=ty=='invite'?'Willkommen! Bitte lege dein Passwort fest.':'Lege ein neues Passwort fest.';
+        history.replaceState(null,'',location.pathname+location.search+'#/konto');
+      }else history.replaceState(null,'',location.pathname+location.search+'#/');
+    }else{
+      pend=(q.get('error_description')||'Der Link ist ungültig oder abgelaufen.').replace(/\+/g,' ');
+      history.replaceState(null,'',location.pathname+location.search+'#/login');
+    }
+  }
+  if(sess)await loadRoles();
+  route();
+})();
+</script>
+</body>
+</html>
