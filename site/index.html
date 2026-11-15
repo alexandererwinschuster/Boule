@@ -81,7 +81,11 @@ const SB='https://ixopqbbnpoqkxqrzykoi.supabase.co',AK='sb_publishable_YCD9dSvUS
 const PT={0:-8,1:-2,2:2,3:8},ST=['','erstellt','geprüft','eingespielt'],TYP={kreisel:'Kreisel',supermelee:'Supermêlée'};
 let sess=null,roles={super:false,vereine:[]},R={v:'home'},V=null,P=null,S=null,list=[],projs=[],admins=[];
 let dayN=null,tab='p',net='',err='',pend='',timer=null,last='',rev=null,arm={k:null},back='#/',lastEmail='',pwFlow='';
+let gate=null,shown=null,codes={};
 try{sess=JSON.parse(localStorage.getItem(SKEY)||'null')}catch(e){}
+try{codes=JSON.parse(localStorage.getItem('boule.codes')||'{}')||{}}catch(e){}
+const codeOf=s=>codes[s]||'';
+function setCode(s,c){if(c)codes[s]=c;else delete codes[s];try{localStorage.setItem('boule.codes',JSON.stringify(codes))}catch(e){}}
 
 /* ---------- Helfer ---------- */
 const $=id=>document.getElementById(id);
@@ -112,6 +116,7 @@ async function api(path,opt,tok){
   return j;
 }
 async function rest(path,opt){return api('/rest/v1/'+path,opt,await token())}
+const rpc=(fn,args)=>rest('rpc/'+fn,{method:'POST',body:JSON.stringify(args||{})});
 function setSess(j,email){
   const u=j.user||{};
   sess={at:j.access_token,rt:j.refresh_token,exp:Date.now()+((j.expires_in||3600)-30)*1000,email:u.email||email||(sess&&sess.email)||'',uid:u.id||(sess&&sess.uid)||''};
@@ -152,21 +157,31 @@ function normalize(p){
   p.daten=d;return d;
 }
 async function route(){
-  R=parse();V=null;P=null;S=null;err='';arm={k:null};tab='p';dayN=null;clearTimeout(timer);net='ok';
+  const mc=location.hash.match(/^([^?]*)\?c=([^&]*)/);
+  if(mc){
+    try{const sl=decodeURIComponent(mc[1]).replace(/^#\/?/,'').split('/');if(sl[0]=='v'&&sl[1])setCode(sl[1],decodeURIComponent(mc[2]))}catch(e){}
+    history.replaceState(null,'',location.pathname+location.search+mc[1]);
+  }
+  R=parse();V=null;P=null;S=null;gate=null;err='';arm={k:null};tab='p';dayN=null;clearTimeout(timer);net='ok';
+  if(!(R.v=='verein'&&shown&&shown.slug==R.vs))shown=null;
   if(R.v=='login'&&sess){history.replaceState(null,'',location.pathname+location.search+'#/');R=parse()}
   $('app').innerHTML=head()+'<p class="sub">Lädt …</p>';
   try{
-    if(R.v=='home')list=await rest('vereine?select=id,name,slug&order=name');
+    if(R.v=='home')list=(await rpc('vereine_liste'))||[];
     else if(R.v=='verein'||R.v=='proj'){
-      const vs=await rest('vereine?select=id,name,slug&slug=eq.'+encodeURIComponent(R.vs));
-      V=vs&&vs[0];if(!V)throw new Error('Verein nicht gefunden.');
-      if(R.v=='verein'){
-        projs=await rest('projekte?select=id,name,slug,typ&verein_id=eq.'+V.id+'&order=name');
-        admins=roles.super?await rest('verein_admins?select=user_id,email&verein_id=eq.'+V.id+'&order=email'):[];
-      }else{
-        const ps=await rest('projekte?select=*&verein_id=eq.'+V.id+'&slug=eq.'+encodeURIComponent(R.ps));
-        P=ps&&ps[0];if(!P)throw new Error('Projekt nicht gefunden.');
-        S=normalize(P);rev=P.updated_at;last=JSON.stringify(S);
+      const vr=await rpc('verein_laden',{vslug:R.vs,vcode:codeOf(R.vs)||null});
+      if(!vr)throw new Error('Verein nicht gefunden.');
+      if(!vr.zugang){gate=vr;if(vr.falsch)setCode(R.vs,null)}
+      else{
+        V={id:vr.id,name:vr.name,slug:vr.slug,geschuetzt:!!vr.geschuetzt};
+        if(R.v=='verein'){
+          projs=vr.projekte||[];
+          admins=roles.super?await rest('verein_admins?select=user_id,email&verein_id=eq.'+V.id+'&order=email'):[];
+        }else{
+          P=await rpc('projekt_laden',{vslug:R.vs,pslug:R.ps,vcode:codeOf(R.vs)||null});
+          if(!P)throw new Error('Projekt nicht gefunden.');
+          S=normalize(P);rev=P.updated_at;last=JSON.stringify(S);
+        }
       }
     }
   }catch(e){err=e.message;V=V||null}
@@ -190,9 +205,9 @@ async function push(){
 }
 async function pull(){
   try{
-    const j=await rest('projekte?select=daten,updated_at&id=eq.'+P.id);
-    const row=j&&j[0];
-    if(row&&row.updated_at!==rev){P.daten=row.daten;S=normalize(P);rev=row.updated_at;last=JSON.stringify(S);render()}
+    const row=await rpc('projekt_stand',{pid:P.id,vcode:codeOf(V.slug)||null});
+    if(!row)throw new Error('Kein Zugriff mehr (Code geändert?). Bitte Seite neu laden.');
+    if(row.updated_at!==rev){P.daten=row.daten;S=normalize(P);rev=row.updated_at;last=JSON.stringify(S);render()}
     net='ok';
   }catch(e){net='err:'+e.message}
   sub();
@@ -308,7 +323,7 @@ function crumb(){
 function vHome(){
   let h='<h1>Vereine</h1>';
   if(!list.length)h+='<div class="card"><p class="sub">Noch keine Vereine.</p></div>';
-  list.forEach(v=>{h+='<div class="card row2"><a class="grow" href="#/v/'+esc(v.slug)+'">'+esc(v.name)+'</a>'+(roles.super?'<button class="b" data-a="delv" data-id="'+v.id+'">'+lbl('v'+v.id,'Löschen')+'</button>':'')+'</div>'});
+  list.forEach(v=>{h+='<div class="card row2"><a class="grow" href="#/v/'+esc(v.slug)+'">'+esc(v.name)+(v.geschuetzt?'<span class="tag">geschützt</span>':'')+'</a>'+(roles.super?'<button class="b" data-a="delv" data-id="'+v.id+'">'+lbl('v'+v.id,'Löschen')+'</button>':'')+'</div>'});
   if(roles.super)h+='<div class="card"><h2>Neuer Verein</h2><div class="bar"><input type="text" id="nv" placeholder="Name des Vereins" autocomplete="off"><button class="b pri" data-a="addv">Anlegen</button></div></div>';
   return h;
 }
@@ -317,12 +332,25 @@ function srcBar(){
   if(!sm.length)return '';
   return '<div class="bar" id="srcbar" hidden><label for="nsrc">Spieler übernehmen aus</label><select id="nsrc"><option value="">niemandem (leer starten)</option>'+sm.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('')+'</select></div>';
 }
+function vGate(){
+  return '<h1>Geschützter Bereich</h1><div class="card"><p class="sub">Für diesen Verein braucht es einen Zugangscode. Den bekommst du vom Verein.</p>'+(gate.falsch?'<div class="warn">Der Code stimmt nicht oder wurde geändert.</div>':'')+'<div class="bar"><input type="text" id="vc" placeholder="Zugangscode" autocomplete="off" autocapitalize="off"><button class="b pri" data-a="sc">Öffnen</button></div></div>';
+}
+function zugangCard(){
+  let h='<div class="card"><h2>Zugang</h2><p class="sub">'+(V.geschuetzt?'Geschützt: Der Verein ist nur mit Zugangscode sichtbar. Angemeldete Admins brauchen keinen Code.':'Öffentlich: Jeder mit dem Link kann alles ansehen.')+'</p>';
+  if(shown&&shown.slug==V.slug){
+    const base=location.origin+location.pathname+'#/v/'+encodeURIComponent(V.slug);
+    h+='<div class="warn"><b>Neuer Code: '+esc(shown.code)+'</b><br>Link: '+esc(base)+'<br>Link mit Code: '+esc(base+'?c='+encodeURIComponent(shown.code))+'<br>Bitte jetzt notieren oder weitergeben. Der Code lässt sich später nicht mehr anzeigen.</div>';
+  }
+  h+='<div class="bar"><input type="text" id="zc" placeholder="Zugangscode (mind. 6 Zeichen)" autocomplete="off" autocapitalize="off"><button class="b" data-a="gc">Erzeugen</button></div><div class="bar"><button class="b pri" data-a="setc">'+(V.geschuetzt?'Code ändern':'Schutz einschalten')+'</button>'+(V.geschuetzt?'<button class="b" data-a="rmc">'+lbl('rmc','Schutz aufheben')+'</button>':'')+'</div></div>';
+  return h;
+}
 function vVerein(){
   const ed=canVerein(V.id);
   let h='<h1>'+esc(V.name)+'</h1><h2>Projekte</h2>';
   if(!projs.length)h+='<div class="card"><p class="sub">Noch keine Projekte.</p></div>';
   projs.forEach(p=>{h+='<div class="card row2"><a class="grow" href="#/v/'+esc(V.slug)+'/p/'+esc(p.slug)+'">'+esc(p.name)+'<span class="tag">'+esc(TYP[p.typ]||p.typ)+'</span></a>'+(ed?'<button class="b" data-a="delp" data-id="'+p.id+'">'+lbl('p'+p.id,'Löschen')+'</button>':'')+'</div>'});
   if(ed)h+='<div class="card"><h2>Neues Projekt</h2><div class="bar"><input type="text" id="np" placeholder="Name des Projekts" autocomplete="off"></div><div class="bar"><select id="nt" aria-label="Art"><option value="kreisel">Kreisel</option><option value="supermelee">Supermêlée</option></select><button class="b pri" data-a="addp">Anlegen</button></div>'+srcBar()+'</div>';
+  if(ed)h+=zugangCard();
   if(roles.super){
     h+='<div class="card"><h2>Projektadministratoren</h2>';
     if(!admins.length)h+='<p class="sub">Noch keine.</p>';
@@ -405,13 +433,14 @@ function sub(){
 function render(){
   let body;
   if(err)body='<div class="warn">'+esc(err)+'</div>';
+  else if(gate)body=vGate();
   else if(R.v=='home')body=vHome();
   else if(R.v=='verein')body=vVerein();
   else if(R.v=='proj')body=vProj();
   else if(R.v=='login')body=vLogin();
   else body=vKonto();
   $('app').innerHTML=head()+crumb()+'<div class="warn" id="msg" hidden></div>'+body;
-  if(R.v=='proj'&&!err){sub();if(canEdit())queue()}
+  if(R.v=='proj'&&!err&&P){sub();if(canEdit())queue()}
 }
 
 /* ---------- Supermêlée ---------- */
@@ -585,6 +614,26 @@ async function act(a,t){
     if(was){await loadRoles();go('#/')}else flash('Passwort gespeichert.');
     return;
   }
+  if(a=='sc'){
+    const c=val('vc');if(!c){flash('Bitte den Code eingeben.');return}
+    setCode(R.vs,c);await route();return;
+  }
+  if(a=='gc'){
+    const al='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=crypto.getRandomValues(new Uint8Array(8)),c=Array.from(b).map(x=>al[x%32]).join('');
+    $('zc').value=c.slice(0,4)+'-'+c.slice(4);return;
+  }
+  if(a=='setc'){
+    if(!V||!canVerein(V.id))return;
+    const c=val('zc');if(c.length<6){flash('Der Code braucht mindestens 6 Zeichen.');return}
+    await rpc('zugang_setzen',{vid:V.id,neuer:c});
+    shown={slug:V.slug,code:c};await route();return;
+  }
+  if(a=='rmc'){
+    if(!V||!canVerein(V.id))return;
+    if(!confirm2('rmc','Danach kann wieder jeder mit dem Link alles sehen. Tippe zur Bestätigung noch einmal.'))return;
+    await rpc('zugang_setzen',{vid:V.id,neuer:''});
+    shown=null;await route();return;
+  }
   if(a=='addv'){
     if(!roles.super)return;
     const name=val('nv');if(!name){flash('Bitte einen Namen eingeben.');return}
@@ -677,10 +726,10 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key!='Enter')return;
-  const m={nn:'add',nv:null,np:null,ae:null,pw:null,em:null,p2:null};
+  const m={nn:'add',nv:null,np:null,ae:null,pw:null,em:null,p2:null,vc:null,zc:null};
   const id=e.target.id;if(!(id in m))return;
   if(id=='nn'){$('add').click();return}
-  const q={nv:'addv',np:'addp',ae:'adda',pw:'li',em:'li',p2:'sp'}[id];
+  const q={nv:'addv',np:'addp',ae:'adda',pw:'li',em:'li',p2:'sp',vc:'sc',zc:'setc'}[id];
   const b=document.querySelector('[data-a="'+q+'"]');if(b)b.click();
 });
 window.addEventListener('hashchange',route);
